@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Player</title>
+<style>
+  :root{
+    --bg:#FAF9F8;
+    --text:#181614;
+    --muted:#181614;
+    --line:#C2A380;
+    --accent:#C2A380;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    padding:0;
+    background:transparent;
+  }
+  body{
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    color:var(--text);
+    display:flex;
+    justify-content:center;
+    padding:24px 0;
+  }
+  .player{
+    width:100%;
+    max-width:520px;
+    background:var(--bg);
+    border-radius:6px;
+    padding:8px 0;
+  }
+  .track{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:16px 20px;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+  }
+  .player .track:last-child{
+    border-bottom:none;
+  }
+  .play-btn{
+    flex:0 0 auto;
+    width:16px;
+    height:16px;
+    border:none;
+    background:transparent;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:transform .15s ease;
+  }
+  .play-btn:hover{
+    transform:scale(1.08);
+  }
+  .play-btn svg{
+    width:16px;
+    height:16px;
+    fill:var(--text);
+  }
+  .track-info{
+    flex:1 1 auto;
+    min-width:0;
+  }
+  .track-title{
+    font-size:14px;
+    letter-spacing:0.02em;
+    font-weight:400;
+    color:var(--text);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+</style>
+</head>
+<body>
+
+<div class="player" id="player">
+  <!-- Tracks are generated from the array below -->
+</div>
+
+<script>
+  // ---- EDIT THIS LIST ----
+  // Replace "src" with a direct URL to each hosted mp3 file.
+  const tracks = [
+    { title: "Test Track", src: "https://drive.google.com/uc?id=1sNMUcbGzoFm8JfvTa0iaF_ud9o60Xq_A&export=download" },
+    { title: "Track Two",   src: "https://example.com/audio/track-two.mp3" },
+    { title: "Track Three", src: "https://example.com/audio/track-three.mp3" }
+  ];
+  // -------------------------
+
+  const playerEl = document.getElementById('player');
+  let currentAudio = null;
+  let currentBtn = null;
+  let currentBar = null;
+
+  function formatTime(sec){
+    if(!isFinite(sec)) return "0:00";
+    const m = Math.floor(sec/60);
+    const s = Math.floor(sec%60).toString().padStart(2,'0');
+    return `${m}:${s}`;
+  }
+
+  tracks.forEach((track) => {
+    const row = document.createElement('div');
+    row.className = 'track';
+
+    const btn = document.createElement('button');
+    btn.className = 'play-btn';
+    btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+
+    const info = document.createElement('div');
+    info.className = 'track-info';
+    const titleEl = document.createElement('div');
+    titleEl.className = 'track-title';
+    titleEl.textContent = track.title;
+    info.appendChild(titleEl);
+
+    row.appendChild(btn);
+    row.appendChild(info);
+    playerEl.appendChild(row);
+
+    const audio = new Audio(track.src);
+    audio.preload = 'metadata';
+
+    audio.addEventListener('ended', () => {
+      resetTrack();
+    });
+
+    function resetTrack(){
+      btn.classList.remove('playing');
+      btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+      audio.currentTime = 0;
+    }
+
+    function play(){
+      if(currentAudio && currentAudio !== audio){
+        currentAudio.pause();
+        currentBtn.classList.remove('playing');
+        currentBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+      }
+      audio.play();
+      btn.classList.add('playing');
+      btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>`;
+      currentAudio = audio;
+      currentBtn = btn;
+    }
+
+    function pause(){
+      audio.pause();
+      btn.classList.remove('playing');
+      btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+    }
+
+    row.addEventListener('click', () => {
+      if(audio.paused){
+        play();
+      } else {
+        pause();
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
